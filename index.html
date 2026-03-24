@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pickles Hotdog</title>
+
+<style>
+body {
+  margin:0;
+  background:#000;
+  color:white;
+  font-family:monospace;
+  text-align:center;
+}
+
+#start {
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:#000;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+
+#start img {
+  width:90%;
+  max-width:400px;
+}
+
+#btn {
+  margin-top:20px;
+  padding:15px 30px;
+  font-size:20px;
+  background:#ffcc00;
+  border:none;
+  border-radius:10px;
+}
+
+canvas {
+  display:none;
+  background:#222;
+  margin:auto;
+  image-rendering:pixelated;
+}
+</style>
+</head>
+
+<body>
+
+<div id="start">
+  <img src="https://i.imgur.com/REPLACE.jpg">
+  <button id="btn">開始擺攤🌭</button>
+</div>
+
+<canvas id="game" width="360" height="500"></canvas>
+
+<script>
+const btn = document.getElementById("btn");
+const start = document.getElementById("start");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let money=0, order=false, cooking=false, cook=0, max=80, served=0;
+let patience=0;
+
+btn.onclick = () => {
+  start.style.display="none";
+  canvas.style.display="block";
+};
+
+canvas.addEventListener("touchstart", action);
+canvas.addEventListener("click", action);
+
+function action(){
+  if(!order){
+    order=true;
+    patience=0;
+  }else if(!cooking){
+    cooking=true;
+    cook=0;
+  }else if(cook>=max){
+    money+=60;
+    served++;
+    reset();
+  }
+}
+
+function reset(){
+  order=false;
+  cooking=false;
+  cook=0;
+  patience=0;
+}
+
+function update(){
+  if(order){
+    patience++;
+    if(patience>300){
+      reset();
+    }
+  }
+  if(cooking) cook++;
+}
+
+function draw(){
+  ctx.clearRect(0,0,360,500);
+
+  ctx.fillStyle="#8B4513";
+  ctx.fillRect(80,320,200,100);
+
+  ctx.fillStyle="#555";
+  ctx.fillRect(120,340,120,20);
+
+  if(cooking){
+    ctx.fillStyle = cook<max ? "#c25a2b" : "#ffd27f";
+    ctx.fillRect(150,340,60,12);
+  }
+
+  if(!order){
+    ctx.fillText("點擊接客人",120,80);
+  }else if(!cooking){
+    ctx.fillText("點擊開始烤",120,80);
+  }else if(cook<max){
+    ctx.fillText("烤製中...",130,80);
+  }else{
+    ctx.fillText("點擊出餐!",120,80);
+  }
+
+  if(order){
+    ctx.fillStyle="red";
+    ctx.fillRect(80,120,200*(1-patience/300),10);
+  }
+
+  ctx.fillStyle="white";
+  ctx.fillText("💰 "+money,10,20);
+  ctx.fillText("🌭 "+served,10,40);
+}
+
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+
+</body>
+</html>
